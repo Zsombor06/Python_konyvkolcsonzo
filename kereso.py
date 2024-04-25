@@ -3,7 +3,12 @@ from tkinter import Entry
 from tkinter import Tk
 from tkinter import Button
 from tkinter import messagebox
-import tkinter
+from db import getBooksByTitle
+from db import getAuthorsByID
+from db import getAuthorsByName
+from db import getBooksByAuthor
+from db import getBooksByCategory
+from db import startRent
 from tkinter.ttk import *
 from raktar import konyvek
 
@@ -17,10 +22,48 @@ def kereso(kereso_oldal):
         konyvtar_kivalaszt.delete(0,END)
         konyvtar_kivalaszt.insert(0,"A könyvtár")
     def keresett():
-        canvas.pack_forget()
-        frame.pack()
-        kivalaszt=kereses_kivalaszt.get()
-        print(konyvek.index(kivalaszt))
+        global konyv_id
+        if(kereses_kivalaszt.get()=="Cím"):
+            canvas.pack_forget()
+            frame.pack()
+            for adat in getBooksByTitle(cimek_Entry.get()):
+                label=Label(frame,text=adat.title)
+                label.grid(row=0,column=1)
+                for adat2 in getAuthorsByID(adat.author_id):
+                    label2=Label(frame,text=adat2.name)
+                    label2.grid(row=1,column=1)
+                label2=Label(frame,text=adat.category)
+                label2.grid(row=2,column=1)
+
+                konyv_id=adat.id
+        if(kereses_kivalaszt.get()=="Szerző"):
+            canvas.pack_forget()
+            frame.pack()
+            for adat in getAuthorsByName(cimek_Entry.get()):
+                label2=Label(frame,text=adat.name)
+                label2.grid(row=1,column=1)
+                for adat2 in getBooksByAuthor(adat.name):
+                    label=Label(frame,text=adat2.title)
+                    label.grid(row=0,column=1)
+                    label2=Label(frame,text=adat2.category)
+                    label2.grid(row=2,column=1)
+                    konyv_id=adat2.id
+        if(kereses_kivalaszt.get()=="Kategória"):
+            canvas.pack_forget()
+            frame.pack()
+            for adat in getBooksByCategory(cimek_Entry.get()):
+                label=Label(frame,text=adat.title)
+                label.grid(row=0,column=1)
+                for adat2 in getAuthorsByID(adat.author_id):
+                    label2=Label(frame,text=adat2.name)
+                    label2.grid(row=1,column=1)
+                label2=Label(frame,text=adat.category)
+                label2.grid(row=2,column=1)
+                konyv_id=adat.id
+
+
+    def berles():
+        startRent(konyv_id)
     #keresés
     kereso_oldal.title("Kereső")
     kereso_oldal.geometry("520x300")
@@ -33,7 +76,7 @@ def kereso(kereso_oldal):
     canvas.create_window(180,60,window=cimek_Entry)
     kereses=Label(canvas,text="Mező a kereséshez:")
     canvas.create_window(65,85,window=kereses)
-    kereses_kivalaszt = Combobox(canvas,values=["Cím","Vonalkód","Szerző","Kiadó","Nyelvkód"],width=17)
+    kereses_kivalaszt = Combobox(canvas,values=["Cím","Szerző","Kategória"],width=17)
     kereses_kivalaszt.insert(0,"Cím")
     canvas.create_window(180,85,window=kereses_kivalaszt)
     konyvtar=Label(canvas,text="Adtabázis:")
@@ -48,39 +91,14 @@ def kereso(kereso_oldal):
     canvas.pack()
     #keresett
     frame=Frame(kereso_oldal,width=500,height=500)
-    for adat in konyvek:
-        sorok=0
-        konyv_cim=Label(frame,text=adat.cim)
-        cim=Label(frame,text="Cím:")
-        cim.grid(row=sorok,column=0)
-        konyv_cim.grid(row=sorok,column=1)
-        konyv_vonalkod=Label(frame,text=adat.vonalkod)
-        sorok+=1
-        vonalkod=Label(frame,text="Vonalkód:")
-        vonalkod.grid(row=sorok,column=0)
-        konyv_vonalkod.grid(row=sorok,column=1)
-        konyv_szerzo=Label(frame,text=adat.szerzo)
-        sorok+=1
-        szerzo=Label(frame,text="Szerző:")
-        szerzo.grid(row=sorok,column=0)        
-        konyv_szerzo.grid(row=sorok,column=1)
-        konyv_kiado=Label(frame,text=adat.kiado)
-        sorok+=1
-        kiado=Label(frame,text="Kiadó:")
-        kiado.grid(row=sorok,column=0)        
-        konyv_kiado.grid(row=sorok,column=1)
-        konyv_ev=Label(frame,text=adat.ev)
-        sorok+=1        
-        konyv_ev.grid(row=sorok,column=1)
-        ev=Label(frame,text="Év:")
-        ev.grid(row=sorok,column=0)
-        konyv_nyelvkod=Label(frame,text=adat.nyelvkod)
-        sorok+=1        
-        nyelvkod1=Label(frame,text="Nyelvkód:")
-        nyelvkod1.grid(row=sorok,column=0)
-        konyv_nyelvkod.grid(row=sorok,column=1)
-        konyv_konyvtar=Label(frame,text=adat.konyvtar)
-        sorok+=1
-        konyvtar1=Label(frame,text="Könyvtár")
-        konyvtar1.grid(row=sorok,column=0)        
-        konyv_konyvtar.grid(row=sorok,column=1)       
+    cim=Label(frame,text="Cím:")
+    cim.grid(row=0,column=0)
+    iro=Label(frame,text="Író")
+    iro.grid(row=1,column=0)
+    kategoria=Label(frame,text="Kategória:")
+    kategoria.grid(row=2,column=0)
+    gomb3=Button(frame,text="Felvétel",command=berles)
+    gomb3.grid(row=4,column=1,columnspan=2,padx=20)
+    gomb3.config(width=20)
+    
+ 

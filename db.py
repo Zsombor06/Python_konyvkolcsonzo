@@ -8,22 +8,23 @@ cur.execute("CREATE TABLE IF NOT EXISTS author (id INTEGER NOT NULL PRIMARY KEY 
 cur.execute("CREATE TABLE IF NOT EXISTS book (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, title VARCHAR(50) NOT NULL, category VARCHAR(50) NOT NULL, author_id INT NOT NULL, FOREIGN KEY(author_id) REFERENCES author(id))")
 cur.execute("CREATE TABLE IF NOT EXISTS rent (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, book_id INT NOT NULL, start_date TEXT NOT NULL, end_date TEXT, FOREIGN KEY(book_id) REFERENCES book(id))")
 
-# Adatok beadása
-def populate():
-    # A szerzők feltöltése adatokkal
-    cur.execute("INSERT INTO author (name) VALUES ('Drew Karpyshyn')")
-    cur.execute("INSERT INTO author (name) VALUES ('J. R. R. Tolkien')")
-    cur.execute("INSERT INTO author (name) VALUES ('Petőfi Sándor')")
-    con.commit()
+# # Adatok beadása
+# def populate():
+#     # A szerzők feltöltése adatokkal
+#     cur.execute("INSERT INTO author (name) VALUES ('Drew Karpyshyn')")
+#     cur.execute("INSERT INTO author (name) VALUES ('J. R. R. Tolkien')")
+#     cur.execute("INSERT INTO author (name) VALUES ('Petőfi Sándor')")
+#     con.commit()
 
-    # A könyvek feltöltése adatokkal
-    cur.execute("INSERT INTO book (title, category, author_id) VALUES ('A Gyűrűk Ura', 'fantasy', 1)")
-    cur.execute("INSERT INTO book (title, category, author_id) VALUES ('Star Wars: The Old Republic - Revan', 'sci-fi', 2)  ")
-    cur.execute("INSERT INTO book (title, category, author_id) VALUES ('János vitéz', 'mese', 3)")
-    con.commit()
-populate() # első futtatás után kommenteld ki
+#     # A könyvek feltöltése adatokkal
+#     cur.execute("INSERT INTO book (title, category, author_id) VALUES ('A Gyűrűk Ura', 'fantasy', 1)")
+#     cur.execute("INSERT INTO book (title, category, author_id) VALUES ('Star Wars: The Old Republic - Revan', 'sci-fi', 2)  ")
+#     cur.execute("INSERT INTO book (title, category, author_id) VALUES ('János vitéz', 'mese', 3)")
+#     con.commit()
+# populate() # első futtatás után kommenteld ki
 
 # Az adatmodelleket tartalmazó classok
+
 class Author:
     def __init__(self, args):
         self.id = args[0]
@@ -75,6 +76,13 @@ def getAuthorsByName(name):
         authors.append(Author(author))
     return authors
 
+def getAuthorsByID(id):
+    authors = []
+    res = con.execute(f"SELECT * FROM author WHERE id LIKE '%{id}%'") 
+    for author in res.fetchall():
+        authors.append(Author(author))
+    return authors
+
 # Visszaadja azon könyvek listáját, amit a paraméterként megadott névre hasonlító nevű szerző írt
 def getBooksByAuthor(name):
     books = []
@@ -94,7 +102,7 @@ def getBooksByCategory(category):
 # Visszaadja azon könyvek listáját, amik a paraméterként átvett címre hasonlító címmel rendelkeznek
 def getBooksByTitle(title):
     books = []
-    res = con.execute(f"SELECT * FROM book WHERE title LIKE '%{title}%'")
+    res = con.execute(f"SELECT * FROM book INNER JOIN author ON book.author_id = author.id  WHERE title LIKE '%{title}%'")
     for book in res.fetchall():
         books.append(Book(book))
     return books
@@ -124,3 +132,6 @@ def getActiveRents():
     for rent in res.fetchall():
         rents.append(Rent(rent))
     return rents
+def getBookOfRent(rent):
+    res=con.execute(f"SELECT * FROM book inner join rent on book.id=rent.book_id WHERE rent.id={rent.id}")
+    return Book(res.fetchone())
