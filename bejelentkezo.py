@@ -11,6 +11,7 @@ import random
 from tkinter import Menu
 from kereso import kereso
 from kijelentkezo import kijelentkezo
+from e_polc import megnyitando
 
 login = Tk()
 login.geometry("300x200")
@@ -38,6 +39,9 @@ def bejelentkez():
 def kijelentkezes():
     kijelentkezo(Toplevel())
 
+def epolcom():
+    megnyitando(Toplevel())
+
 beazonosit=Label(login,text="Kérem azonosítsa magát:")
 vonalkod1 = Label(login,text = "Vonalkód:")
 vonalkod2 = Label(login,text = "Vonalkód:")
@@ -56,6 +60,7 @@ vonalkod2_bemenet.place(x=130,y=75)
 
 menusav=Menu(login)
 menusav.add_command(label="Kijelentkezés",command=kijelentkezes)
+menusav.add_command(label="E-polcom",command=epolcom)
 
 
 konyvtar_kivalaszt = ttk.Combobox(
